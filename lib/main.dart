@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:date_format/date_format.dart';
 
 void main() => runApp(
     MaterialApp(
@@ -17,11 +18,31 @@ class Home extends StatefulWidget{
 
 class _HomeState extends State<Home>{
 
-  List _toDoList = [
-    "Tarefa A", "Tarefa B",
-    "Tarefa C", "Tarefa D",
-    "Tarefa E", "Tarefa F",
-  ];
+  final _toDoController = TextEditingController();
+
+  List _toDoList = [];
+
+  @override
+  void initState(){
+    super.initState();
+    _readData().then((data){
+      setState(() {
+        _toDoList = json.decode(data);
+      });
+    });
+  }
+
+  void _addToDo(){
+    setState(() {
+      Map<String, dynamic> newToDo = Map();
+      newToDo["titulo"] = _toDoController.text;
+      _toDoController.text = "";
+      newToDo["status"] = false;
+      newToDo["inicio"] = formatDate(DateTime.now(), [dd, '/', mm, '/', yyyy]);
+      _toDoList.add(newToDo);
+      _saveData();
+    });
+  }
 
   //Obter dados
   Future<String> _readData() async{
@@ -57,6 +78,7 @@ class _HomeState extends State<Home>{
     );
 
     TextField textField = TextField(
+      controller: _toDoController,
       decoration: InputDecoration(
         labelText: "Nova Tarefa",
         labelStyle: TextStyle(color: Colors.black)
@@ -64,7 +86,7 @@ class _HomeState extends State<Home>{
     );
 
     RaisedButton btnAdd = RaisedButton(
-      onPressed: null,
+      onPressed: _addToDo,
       color: Colors.black,
       child: Text("ADD"),
       textColor: Colors.white,
@@ -92,11 +114,19 @@ class _HomeState extends State<Home>{
       itemCount: _toDoList.length,
       itemBuilder: (context, index){
         return CheckboxListTile(
-          title: Text(_toDoList[index]),
-          value: false,
+          title: Text(_toDoList[index]["titulo"]),
+          value: _toDoList[index]["status"],
           secondary: CircleAvatar(
-            child: Icon(Icons.check),
+            child: Icon(
+                _toDoList[index]["status"] ? Icons.thumb_up : Icons.thumb_down
+            ),
           ),
+          onChanged: (value){
+            setState(() {
+              _toDoList[index]["status"] = value;
+              _saveData();
+            });
+          },
         );
       },
     );
