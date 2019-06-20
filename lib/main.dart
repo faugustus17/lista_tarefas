@@ -17,7 +17,11 @@ class Home extends StatefulWidget{
 
 class _HomeState extends State<Home>{
 
-  List _toDoList = [];
+  List _toDoList = [
+    "Tarefa A", "Tarefa B",
+    "Tarefa C", "Tarefa D",
+    "Tarefa E", "Tarefa F",
+  ];
 
   //Obter dados
   Future<String> _readData() async{
@@ -82,10 +86,28 @@ class _HomeState extends State<Home>{
       child: row,
     );
 
+    //Configurando a lista de tarefas
+    ListView listViewTarefas = ListView.builder(
+      padding: EdgeInsets.only(top: 10.0),
+      itemCount: _toDoList.length,
+      itemBuilder: (context, index){
+        return CheckboxListTile(
+          title: Text(_toDoList[index]),
+          value: false,
+          secondary: CircleAvatar(
+            child: Icon(Icons.check),
+          ),
+        );
+      },
+    );
+
     //Configurando as colunas
     Column column = Column(
       children: <Widget>[
-        containerTop
+        containerTop,
+        Expanded(
+          child: listViewTarefas,
+        )
       ],
     );
 
