@@ -17,6 +17,8 @@ class Home extends StatefulWidget{
 
 class _HomeState extends State<Home>{
 
+  List _toDoList = [];
+
   //Obter dados
   Future<String> _readData() async{
     try{
@@ -42,6 +44,57 @@ class _HomeState extends State<Home>{
 
   @override
   Widget build(BuildContext context){
-    return Container();
+
+    //Configurando a AppBar
+    AppBar appBar = AppBar(
+      title: Text("Lista de Tarefas"),
+      backgroundColor: Colors.black26,
+      centerTitle: true,
+    );
+
+    TextField textField = TextField(
+      decoration: InputDecoration(
+        labelText: "Nova Tarefa",
+        labelStyle: TextStyle(color: Colors.black)
+      ),
+    );
+
+    RaisedButton btnAdd = RaisedButton(
+      onPressed: null,
+      color: Colors.black,
+      child: Text("ADD"),
+      textColor: Colors.white,
+    );
+
+    //Configurando a linha do input e button
+    Row row = Row(
+      children: <Widget>[
+        Expanded(
+          child: textField,
+        ),
+        btnAdd,
+      ],
+    );
+
+    //Configurando o container do topo
+    Container containerTop = Container(
+      padding: EdgeInsets.fromLTRB(18.0, 1.0, 6.0, 1.0),
+      child: row,
+    );
+
+    //Configurando as colunas
+    Column column = Column(
+      children: <Widget>[
+        containerTop
+      ],
+    );
+
+    //Configurando os elementos na tela
+    Scaffold scaffold = Scaffold(
+      appBar: appBar,
+      body: column,
+    );
+
+    return scaffold;
   }
 }
