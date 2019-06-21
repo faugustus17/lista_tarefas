@@ -22,6 +22,9 @@ class _HomeState extends State<Home>{
 
   List _toDoList = [];
 
+  Map<String, dynamic> _ultimaTarefaRemovida;
+  int _ultimaTarefaRemovidaPosicao;
+
   @override
   void initState(){
     super.initState();
@@ -65,6 +68,24 @@ class _HomeState extends State<Home>{
   Future<File> _getFile() async{
     final directory = await getApplicationDocumentsDirectory();
     return File("${directory.path}/dados_tarefa.json");
+  }
+
+  Widget buildItemCheckBoxListTile(context, index){
+    return CheckboxListTile(
+      title: Text(_toDoList[index]["titulo"]),
+      value: _toDoList[index]["status"],
+      secondary: CircleAvatar(
+        child: Icon(
+            _toDoList[index]["status"] ? Icons.thumb_up : Icons.thumb_down
+        ),
+      ),
+      onChanged: (value){
+        setState(() {
+          _toDoList[index]["status"] = value;
+          _saveData();
+        });
+      },
+    );
   }
 
   @override
@@ -113,18 +134,36 @@ class _HomeState extends State<Home>{
       padding: EdgeInsets.only(top: 10.0),
       itemCount: _toDoList.length,
       itemBuilder: (context, index){
-        return CheckboxListTile(
-          title: Text(_toDoList[index]["titulo"]),
-          value: _toDoList[index]["status"],
-          secondary: CircleAvatar(
-            child: Icon(
-                _toDoList[index]["status"] ? Icons.thumb_up : Icons.thumb_down
+        return Dismissible(
+          key: Key(DateTime.now().millisecondsSinceEpoch.toString()),
+          background: Container(
+            color: Colors.red,
+            child: Align(
+              alignment: Alignment(-0.9, 0.0),
+              child: Icon(Icons.delete, color: Colors.white,),
             ),
           ),
-          onChanged: (value){
+          direction: DismissDirection.startToEnd,
+          child: buildItemCheckBoxListTile(context, index),
+          onDismissed: (direction){
             setState(() {
-              _toDoList[index]["status"] = value;
+              _ultimaTarefaRemovida = Map.from(_toDoList[index]);
+              _ultimaTarefaRemovidaPosicao = index;
+              _toDoList.removeAt(index);
               _saveData();
+              final snack = SnackBar(
+                content: Text("Tarefa \"${_ultimaTarefaRemovida["titulo"]}\"removida."),
+                action: SnackBarAction(
+                    label: "Desfazer",
+                    onPressed:(){
+                      setState(() {
+                        _toDoList.insert(_ultimaTarefaRemovidaPosicao, _ultimaTarefaRemovida);
+                        _saveData();
+                      });
+                    }),
+                duration: Duration(seconds: 3),
+              );
+              Scaffold.of(context).showSnackBar(snack);
             });
           },
         );
